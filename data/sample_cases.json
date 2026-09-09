@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Sales lead",
+    "text": "We want pricing and a product demo for 200 users.",
+    "order_id": null,
+    "amount_usd": null
+  },
+  {
+    "name": "Technical support",
+    "text": "The device stopped working after an update.",
+    "order_id": null,
+    "amount_usd": null
+  },
+  {
+    "name": "Billing",
+    "text": "We were charged twice on our latest invoice.",
+    "order_id": null,
+    "amount_usd": null
+  },
+  {
+    "name": "Order status",
+    "text": "My shipment has not arrived. Where is my order?",
+    "order_id": "ORD-1042",
+    "amount_usd": null
+  },
+  {
+    "name": "Refund",
+    "text": "I want a refund for my order.",
+    "order_id": "ORD-1043",
+    "amount_usd": 99
+  }
+]
