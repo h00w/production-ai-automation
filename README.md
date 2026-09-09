@@ -2,7 +2,7 @@
 
 # Production AI Automation System
 
-**Proof of Work — Hendarmawan, PhD Eng.**
+**Proof of Work by Hendarmawan, PhD Eng.**
 
 A production-oriented AI automation portfolio project demonstrating how an ambiguous business request can be transformed into a controlled workflow with:
 
@@ -23,9 +23,9 @@ The project is intentionally designed as a **small, inspectable system** rather 
 
 Many AI demos optimize only for a fluent answer. Production automation must also control:
 
-1. **Context** — what information enters the model
-2. **Action** — what the system is allowed to do
-3. **Verification** — how outputs and actions are checked
+1. **Context** : what information enters the model
+2. **Action** : what the system is allowed to do
+3. **Verification** : how outputs and actions are checked
 
 This repository applies that **CAV Loop: Context → Action → Verification** to a business-operations automation scenario.
 
