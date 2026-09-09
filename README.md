@@ -1,3 +1,5 @@
+[![CI](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml)
+
 # Production AI Automation System
 
 **Proof of Work — Hendarmawan, PhD Eng.**
