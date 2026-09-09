@@ -1,5 +1,9 @@
 [![CI](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml)
 
+## Live Demo
+
+**Try the application:** [Production AI Automation System](https://pro-ai-automation.streamlit.app/)
+
 # Production AI Automation System
 
 **Proof of Work by Hendarmawan, PhD Eng.**
