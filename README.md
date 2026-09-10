@@ -25,6 +25,14 @@
   <a href="article/production_ai_automation_article.md">Technical Article</a>
 </p>
 
+<p align="center">
+  <a href="https://pro-ai-automation.streamlit.app/">
+    <img src="https://raw.githubusercontent.com/h00w/production-ai-automation/refs/heads/main/cover.png" alt="Production AI Automation System — workflow architecture and live proof-of-work" width="920">
+  </a>
+</p>
+
+<p align="center"><em>Production AI automation with explicit context, controlled actions, verification gates, and human-in-the-loop escalation. Click the image to open the live demo.</em></p>
+
 ---
 
 ## What this project demonstrates
