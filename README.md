@@ -18,11 +18,11 @@
 </p>
 
 <p align="center">
-  <a href="https://pro-ai-automation.streamlit.app/"><strong>Live Demo</strong></a> ·
-  <a href="docs/architecture.md">Architecture</a> ·
-  <a href="docs/business_outcome.md">Business Outcomes</a> ·
-  <a href="tests/">Tests</a> ·
-  <a href="article/production_ai_automation_article.md">Technical Article</a>
+  <a href="https://pro-ai-automation.streamlit.app/"><strong>Live Demo</strong></a> →
+  <a href="docs/architecture.md"><strong>Architecture</strong></a> →
+  <a href="#evaluation-flow"><strong>Evaluation Flow</strong></a> →
+  <a href="docs/business_outcome.md"><strong>Business Outcome</strong></a> →
+  <a href="#run-locally"><strong>Run Locally</strong></a>
 </p>
 
 <p align="center">
@@ -32,6 +32,66 @@
 </p>
 
 <p align="center"><em>Production AI automation with explicit context, controlled actions, verification gates, and human-in-the-loop escalation. Click the image to open the live demo.</em></p>
+
+---
+
+## Reviewer quick start
+
+### What problem does this solve?
+
+AI prototypes often optimize for a fluent response. Production systems have a harder requirement: they must control **what enters the system, what actions are allowed, how outputs are evaluated, what happens when quality is insufficient, and how consequential actions are reviewed**.
+
+This project turns an incoming business request into an inspectable workflow with validation, intent classification, controlled tool access, policy checks, verification gates, human escalation, and an audit trace.
+
+The goal is not to build a chatbot. The goal is to demonstrate how AI-assisted automation can remain **testable, bounded, reviewable, and recoverable**.
+
+### How does the evaluation work?
+
+Each workflow is evaluated at multiple layers rather than with one opaque score:
+
+1. **Input validation** — Is the request complete and structurally valid?
+2. **Intent / routing evaluation** — Can the request be classified confidently enough to choose a workflow?
+3. **Tool-boundary validation** — Is the requested action permitted and does the required data exist?
+4. **Business-rule evaluation** — Does the proposed action satisfy explicit policy and risk thresholds?
+5. **Verification gate** — Is the result safe to complete automatically, or should it stop for review?
+6. **Audit + metrics** — What happened, why, and what evidence should be retained for later evaluation?
+
+This structure makes evaluation actionable: a reviewer can see **where** a workflow failed rather than only seeing that it failed.
+
+### What happens when AI output fails?
+
+The system is designed to fail safely:
+
+- missing data → request additional information instead of guessing
+- ambiguous intent → route to human review
+- policy violation → block automatic completion
+- high-risk or high-value action → require approval
+- invalid tool result → stop rather than silently continue
+- failed regression expectation → fail CI before release
+
+A failed evaluation therefore becomes a controlled state, not an uncontrolled side effect.
+
+### How is human review handled?
+
+Human review is an explicit workflow state, not an afterthought. Consequential or uncertain actions are prepared with the relevant context and routed to an approval step. The final outcome remains traceable so reviewers can understand the request, the proposed action, the policy decision, and the resolution.
+
+This pattern supports human-in-the-loop operation without requiring every low-risk workflow to be manual.
+
+### How would this extend to LLM / prompt regression testing?
+
+The same verification model can be extended from business workflows to prompts, models, and agents:
+
+- keep a versioned evaluation dataset of representative and adversarial cases
+- run candidate prompts/models against the same dataset on every change
+- score dimensions such as factuality, relevance, instruction adherence, safety, tool-use correctness, latency, and cost
+- compare candidate vs. baseline behavior
+- define blocking thresholds for critical regressions
+- route borderline cases to human review
+- store traces so failures can be clustered and converted into new regression tests
+
+That turns prompt engineering into an empirical loop:
+
+**Change → Evaluate → Compare → Diagnose → Approve / Reject → Add Regression Case**
 
 ---
 
@@ -73,9 +133,27 @@ The design follows a simple **CAV Loop**:
 | **Action** | Route work through explicit tools and workflows | *What is the system allowed to do?* |
 | **Verification** | Apply rules, risk thresholds, checks, and escalation | *Should this outcome be accepted or reviewed?* |
 
-## Live scenarios
+## Evaluation flow
 
-The Streamlit application demonstrates several business-process paths:
+```text
+Request
+  ↓
+Input validation
+  ↓
+Intent / routing evaluation
+  ↓
+Controlled tool boundary
+  ↓
+Business-rule validation
+  ↓
+Verification gate
+  ├─ Pass → Complete → Audit trace + metrics
+  └─ Fail / uncertain / high risk → Human review → Resolved outcome
+```
+
+The evaluation layer is deliberately decomposed so quality failures can be traced to a specific decision point. This is the same pattern used in robust LLM evaluation systems: separate the dimensions, preserve evidence, and make regression criteria explicit.
+
+## Live scenarios
 
 | Scenario | Example behavior | Automation policy |
 |---|---|---|
@@ -89,7 +167,7 @@ The Streamlit application demonstrates several business-process paths:
 
 ### Example: consequential action
 
-A high-value refund does **not** execute blindly. The system prepares the action, applies policy, and stops at a human-approval gate:
+A high-value refund does **not** execute blindly:
 
 ```text
 Request
@@ -152,52 +230,6 @@ production-ai-automation/
         └── ci.yml                 # Automated validation
 ```
 
-## Run locally
-
-### 1. Clone
-
-```bash
-git clone https://github.com/h00w/production-ai-automation.git
-cd production-ai-automation
-```
-
-### 2. Create a virtual environment
-
-Windows PowerShell:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-macOS / Linux:
-
-```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-### 4. Validate the implementation
-
-```bash
-python -m pytest -q
-```
-
-### 5. Run the application
-
-```bash
-python -m streamlit run app.py
-```
-
-Then open `http://localhost:8501`.
-
 ## Validation strategy
 
 The repository separates **functional proof**, **test evidence**, and **production business outcomes**.
@@ -244,6 +276,52 @@ A production evolution can connect the same workflow boundaries to:
 
 Mentioning these systems describes the **integration path**, not integrations claimed as already implemented in this repository.
 
+## Run locally
+
+### 1. Clone
+
+```bash
+git clone https://github.com/h00w/production-ai-automation.git
+cd production-ai-automation
+```
+
+### 2. Create a virtual environment
+
+Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 4. Validate the implementation
+
+```bash
+python -m pytest -q
+```
+
+### 5. Run the application
+
+```bash
+python -m streamlit run app.py
+```
+
+Then open `http://localhost:8501`.
+
 ## Design principle
 
 > **AI may propose. Software validates. Policy authorizes. Tools execute within boundaries. Verification decides whether the workflow is complete.**
@@ -252,20 +330,22 @@ That principle is the core of this project: production AI automation should be u
 
 ## Proof of work
 
-This repository is part of a professional AI & automation portfolio demonstrating the complete engineering lifecycle:
+This repository demonstrates the complete engineering lifecycle:
 
 **Design → Implement → Test → Deploy → Document → Measure**
 
 - **Live application:** https://pro-ai-automation.streamlit.app/
 - **Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Evaluation flow:** [Evaluation Flow](#evaluation-flow)
 - **Business outcomes:** [docs/business_outcome.md](docs/business_outcome.md)
+- **Tests:** [tests/](tests/)
 - **Technical article:** [Beyond the AI Demo: Engineering Automation That Survives Production](article/production_ai_automation_article.md)
 - **CI:** [GitHub Actions](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml)
 
 ## Author
 
 **Hendarmawan, PhD Eng.**  
-AI Automation · Production AI · Edge AI · System Architecture · Secure AI Infrastructure
+AI Automation · Production AI · LLM Evaluation · Agentic Systems · Secure AI Infrastructure
 
 [LinkedIn](https://www.linkedin.com/in/hender/) · [GitHub](https://github.com/h00w) · [LIFE-AI](https://www.life-ai.se/) · [Live Demo](https://pro-ai-automation.streamlit.app/)
 
