@@ -88,3 +88,16 @@ st.markdown(
 **Evidence integrity:** This is a portfolio demonstration using synthetic business data. It does not claim production customer metrics.
 """
 )
+
+st.divider()
+st.markdown(
+    """
+<div style="text-align:center;color:#64748b;font-size:0.88rem;padding:0.5rem 0 1rem;">
+  <strong>Hendarmawan, PhD Eng.</strong> &nbsp;·&nbsp;
+  <a href="https://github.com/h00w/" target="_blank">GitHub</a> &nbsp;·&nbsp;
+  <a href="https://www.linkedin.com/in/hender/" target="_blank">LinkedIn</a> &nbsp;·&nbsp;
+  <a href="https://hendarmawan.se" target="_blank">hendarmawan.se</a>
+</div>
+""",
+    unsafe_allow_html=True,
+)
