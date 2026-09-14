@@ -1,357 +1,150 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Production%20AI-Automation-6C63FF?style=for-the-badge" alt="Production AI Automation">
+  <a href="https://pro-ai-automation.streamlit.app/">
+    <img src="https://raw.githubusercontent.com/h00w/h00w.github.io/refs/heads/main/public/production-ai-automation.png" alt="Production AI Automation — governed workflow engineering" width="100%">
+  </a>
 </p>
 
-<h1 align="center">Production AI Automation System</h1>
+<h1 align="center">Production AI Automation</h1>
 
 <p align="center">
-  <strong>Context → Action → Verification.</strong><br>
-  A production-oriented workflow for turning ambiguous business requests into controlled, auditable automation.
+  <strong>AI Workflow Engineering</strong><br>
+  Production-oriented workflow automation with typed contracts, tool boundaries, business-rule verification, human approval and auditable outcomes.
+</p>
+
+<p align="center">
+  <a href="https://pro-ai-automation.streamlit.app/"><strong>Live Demo ↗</strong></a> ·
+  <a href="docs/architecture.md"><strong>Architecture</strong></a> ·
+  <a href="docs/business_outcome.md"><strong>Business Outcomes</strong></a> ·
+  <a href="article/production_ai_automation_article.md"><strong>Technical Article</strong></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white">
   <img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?logo=streamlit&logoColor=white">
-  <img alt="Human in the Loop" src="https://img.shields.io/badge/Human--in--the--Loop-Controlled-0F766E">
-  <img alt="Status" src="https://img.shields.io/badge/status-proof--of--work-success">
+  <img alt="Human approval" src="https://img.shields.io/badge/Human--in--the--Loop-Controlled-0F766E">
 </p>
-
-<p align="center">
-  <a href="https://pro-ai-automation.streamlit.app/"><strong>Live Demo</strong></a> →
-  <a href="docs/architecture.md"><strong>Architecture</strong></a> →
-  <a href="#evaluation-flow"><strong>Evaluation Flow</strong></a> →
-  <a href="docs/business_outcome.md"><strong>Business Outcome</strong></a> →
-  <a href="#run-locally"><strong>Run Locally</strong></a>
-</p>
-
-<p align="center">
-  <a href="https://pro-ai-automation.streamlit.app/">
-    <img src="https://raw.githubusercontent.com/h00w/production-ai-automation/refs/heads/main/cover.png" alt="Production AI Automation System — workflow architecture and live proof-of-work" width="920">
-  </a>
-</p>
-
-<p align="center"><em>Production AI automation with explicit context, controlled actions, verification gates, and human-in-the-loop escalation. Click the image to open the live demo.</em></p>
 
 ---
 
-## Reviewer quick start
+## Why this project exists
 
-### What problem does this solve?
+AI prototypes often optimize for a fluent response. Production automation has a harder requirement: it must control **what enters the system, what actions are allowed, how outputs are verified, what happens when quality is insufficient, and when a human must intervene**.
 
-AI prototypes often optimize for a fluent response. Production systems have a harder requirement: they must control **what enters the system, what actions are allowed, how outputs are evaluated, what happens when quality is insufficient, and how consequential actions are reviewed**.
+This repository turns ambiguous business requests into inspectable workflows with validation, intent routing, bounded tools, business rules, explicit verification gates, human escalation, and an audit trail.
 
-This project turns an incoming business request into an inspectable workflow with validation, intent classification, controlled tool access, policy checks, verification gates, human escalation, and an audit trace.
+> **AI may propose. Software validates. Policy authorizes. Tools execute within boundaries. Verification decides whether the workflow is complete.**
 
-The goal is not to build a chatbot. The goal is to demonstrate how AI-assisted automation can remain **testable, bounded, reviewable, and recoverable**.
+## Control model
 
-### How does the evaluation work?
-
-Each workflow is evaluated at multiple layers rather than with one opaque score:
-
-1. **Input validation** — Is the request complete and structurally valid?
-2. **Intent / routing evaluation** — Can the request be classified confidently enough to choose a workflow?
-3. **Tool-boundary validation** — Is the requested action permitted and does the required data exist?
-4. **Business-rule evaluation** — Does the proposed action satisfy explicit policy and risk thresholds?
-5. **Verification gate** — Is the result safe to complete automatically, or should it stop for review?
-6. **Audit + metrics** — What happened, why, and what evidence should be retained for later evaluation?
-
-This structure makes evaluation actionable: a reviewer can see **where** a workflow failed rather than only seeing that it failed.
-
-### What happens when AI output fails?
-
-The system is designed to fail safely:
-
-- missing data → request additional information instead of guessing
-- ambiguous intent → route to human review
-- policy violation → block automatic completion
-- high-risk or high-value action → require approval
-- invalid tool result → stop rather than silently continue
-- failed regression expectation → fail CI before release
-
-A failed evaluation therefore becomes a controlled state, not an uncontrolled side effect.
-
-### How is human review handled?
-
-Human review is an explicit workflow state, not an afterthought. Consequential or uncertain actions are prepared with the relevant context and routed to an approval step. The final outcome remains traceable so reviewers can understand the request, the proposed action, the policy decision, and the resolution.
-
-This pattern supports human-in-the-loop operation without requiring every low-risk workflow to be manual.
-
-### How would this extend to LLM / prompt regression testing?
-
-The same verification model can be extended from business workflows to prompts, models, and agents:
-
-- keep a versioned evaluation dataset of representative and adversarial cases
-- run candidate prompts/models against the same dataset on every change
-- score dimensions such as factuality, relevance, instruction adherence, safety, tool-use correctness, latency, and cost
-- compare candidate vs. baseline behavior
-- define blocking thresholds for critical regressions
-- route borderline cases to human review
-- store traces so failures can be clustered and converted into new regression tests
-
-That turns prompt engineering into an empirical loop:
-
-**Change → Evaluate → Compare → Diagnose → Approve / Reject → Add Regression Case**
-
----
-
-## What this project demonstrates
-
-Many AI prototypes optimize for a fluent answer. Production automation has a harder job: it must control **what enters the system, what actions are allowed, and how every outcome is verified**.
-
-This project implements that idea as a small, inspectable business-operations automation system. An incoming request is validated, classified, routed through an explicit workflow, passed to a controlled tool boundary, checked against business rules, and either completed or escalated to a human.
-
-It is deliberately designed as **production-style proof of work rather than a toy chatbot**.
-
-<p align="center">
-  <a href="https://pro-ai-automation.streamlit.app/"><img src="https://img.shields.io/badge/▶%20TRY%20THE%20LIVE%20DEMO-pro--ai--automation.streamlit.app-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Try the live demo"></a>
-</p>
-
-## Architecture at a glance
+The implementation follows a simple Context → Action → Verification loop:
 
 ```mermaid
 flowchart TD
-    A[Business Request] --> B[Input Validation]
-    B --> C[AI / Intent Classification]
-    C --> D[Workflow Router]
-    D --> E[Controlled Tool / API Adapter]
-    D --> H[Human Review]
-    E --> F[Business Rule Validation]
-    F --> G{Verification Gate}
-    G -->|Low risk / valid| I[Complete Action]
-    G -->|High risk / ambiguous| H
-    H --> J[Approved / Resolved Outcome]
-    I --> K[Audit Trace + Metrics]
-    J --> K
+    A[Business Request] --> B[Typed Input Validation]
+    B --> C[Intent / Routing]
+    C --> D[Controlled Tool Boundary]
+    D --> E[Business Rule Verification]
+    E --> F{Verification Gate}
+    F -->|low risk + valid| G[Complete Action]
+    F -->|high risk / uncertain| H[Human Approval]
+    H --> I[Resolved Outcome]
+    G --> J[Audit Trace + Metrics]
+    I --> J
 ```
 
-The design follows a simple **CAV Loop**:
+## What the project demonstrates
 
-| Layer | Responsibility | Production question |
-|---|---|---|
-| **Context** | Validate and structure incoming information | *Do we have the right data to make this decision?* |
-| **Action** | Route work through explicit tools and workflows | *What is the system allowed to do?* |
-| **Verification** | Apply rules, risk thresholds, checks, and escalation | *Should this outcome be accepted or reviewed?* |
+| Layer | Engineering control | Production question |
+| --- | --- | --- |
+| Context | typed contracts and validation | do we have enough trustworthy data? |
+| Routing | explicit workflow selection | which workflow is allowed to act? |
+| Tool boundary | controlled adapters | what external side effects are permitted? |
+| Business rules | deterministic checks | does the proposed action satisfy policy? |
+| Human approval | escalation state | should a person authorize this outcome? |
+| Verification | accept / review decision | can this workflow safely complete? |
+| Audit | structured trace | can the decision be reconstructed later? |
 
-## Evaluation flow
+## Safe failure behavior
 
-```text
-Request
-  ↓
-Input validation
-  ↓
-Intent / routing evaluation
-  ↓
-Controlled tool boundary
-  ↓
-Business-rule validation
-  ↓
-Verification gate
-  ├─ Pass → Complete → Audit trace + metrics
-  └─ Fail / uncertain / high risk → Human review → Resolved outcome
-```
+The workflow is designed to stop safely rather than guess:
 
-The evaluation layer is deliberately decomposed so quality failures can be traced to a specific decision point. This is the same pattern used in robust LLM evaluation systems: separate the dimensions, preserve evidence, and make regression criteria explicit.
+- missing data → request additional information;
+- ambiguous intent → route to human review;
+- policy violation → block automatic completion;
+- consequential action → require approval;
+- invalid tool result → stop the workflow;
+- failed regression expectation → fail CI before release.
 
-## Live scenarios
+A failed evaluation becomes an explicit system state, not an uncontrolled side effect.
 
-| Scenario | Example behavior | Automation policy |
-|---|---|---|
-| **Sales lead** | Creates a structured lead record | Automated |
-| **Technical support** | Creates a routed support ticket | Automated |
-| **Billing** | Creates a billing-support workflow | Automated |
-| **Order status** | Reads order state from a tool adapter | Automated when required data exists |
-| **Refund** | Checks order and configured policy | Human approval for high-value cases |
-| **Ambiguous request** | Routes safely to review | Human-in-the-loop |
-| **Missing data** | Requests the missing information | No guessing / no silent completion |
+## Example scenarios
 
-### Example: consequential action
-
-A high-value refund does **not** execute blindly:
-
-```text
-Request
-  ↓
-Intent: refund
-  ↓
-Order lookup
-  ↓
-Policy validation
-  ↓
-Risk threshold exceeded
-  ↓
-Human approval required
-  ↓
-Auditable outcome
-```
+| Scenario | Behavior | Policy |
+| --- | --- | --- |
+| Sales lead | create structured lead record | automated |
+| Technical support | route support ticket | automated |
+| Billing | create billing workflow | automated |
+| Order status | read from bounded adapter | automated when data exists |
+| High-value refund | validate policy and amount | human approval |
+| Ambiguous request | prepare context for review | human-in-the-loop |
+| Missing data | request required field | no guessing |
 
 ## Production controls
 
-- **Schema-first contracts** using Pydantic
-- **Explicit workflow states** instead of unconstrained agent behavior
-- **Tool/API abstraction** separating reasoning from external side effects
-- **Human-in-the-loop escalation** for ambiguous or consequential actions
-- **Business-rule validation** around automated decisions
-- **Safe failure paths** for missing or invalid information
-- **Audit traces** for important state transitions
-- **Regression tests** for core workflow behavior
-- **GitHub Actions CI** using Python 3.12
-- **Synthetic demonstration data** to avoid exposing customer information
+- Pydantic schema-first contracts
+- explicit workflow states
+- bounded tool/API abstraction
+- business-rule validation
+- human approval for consequential actions
+- safe failure paths
+- audit traces for important transitions
+- regression tests
+- GitHub Actions CI
+- synthetic demonstration data only
 
-## Repository map
+## Evaluation and release discipline
 
-```text
-production-ai-automation/
-│
-├── app.py                         # Streamlit application
-├── requirements.txt               # Runtime/test dependencies
-├── pyproject.toml                 # Pytest configuration
-├── Dockerfile                     # Container deployment
-│
-├── src/
-│   ├── models.py                  # Structured request/result contracts
-│   ├── workflow.py                # Core orchestration and policy logic
-│   └── adapters.py                # External tool/API boundary
-│
-├── tests/
-│   └── test_workflow.py           # Regression tests
-│
-├── docs/
-│   ├── architecture.md            # Architecture and design decisions
-│   ├── business_outcome.md        # KPI and outcome framework
-│   └── walkthrough_script.md      # Demo walkthrough
-│
-├── article/
-│   ├── production_ai_automation_article.md
-│   └── production_ai_automation_article.html
-│
-└── .github/
-    └── workflows/
-        └── ci.yml                 # Automated validation
-```
+The same architecture extends naturally to prompts, models, and agents:
 
-## Validation strategy
+**Change → Evaluate → Compare → Diagnose → Approve / Reject → Add Regression Case**
 
-The repository separates **functional proof**, **test evidence**, and **production business outcomes**.
-
-Automated tests validate core workflow behavior such as:
-
-- successful low-risk automation
-- high-value refund escalation
-- missing-data handling
-- safe routing of ambiguous requests
-
-GitHub Actions reproduces the test suite on every push and pull request.
-
-> [!IMPORTANT]
-> Metrics and outcomes in this repository are demonstration or synthetic-test evidence unless explicitly identified otherwise. The project does **not** claim unverified customer ROI, revenue uplift, or production workload reduction.
-
-## Business outcome framework
-
-A production deployment should measure outcomes rather than rely on qualitative claims. The companion [business outcome document](docs/business_outcome.md) defines metrics including:
-
-- automation rate
-- mean handling time
-- safe escalation rate
-- classification accuracy
-- false-automation rate
-- tool/API failure rate
-- duplicate-action rate
-- cost per completed workflow
-- audit completeness
-
-The principle is straightforward: **measure business impact after deployment; do not fabricate it in the prototype.**
-
-## Scaling path
-
-The current proof uses deterministic local adapters so reviewers can execute it without credentials. The architecture intentionally keeps integrations replaceable.
-
-A production evolution can connect the same workflow boundaries to:
-
-- OpenAI, Claude, Gemini, or other model providers
-- HubSpot, Salesforce, Zendesk, Stripe, or internal APIs
-- n8n, Make, Zapier, Temporal, or LangGraph orchestration
-- PostgreSQL, warehouses, or SIEM/audit stores
-- OpenTelemetry and production observability platforms
-
-Mentioning these systems describes the **integration path**, not integrations claimed as already implemented in this repository.
+A production evaluation suite can add factuality, relevance, instruction adherence, tool correctness, safety, latency, cost, and policy compliance while preserving the same principle: **separate evidence dimensions and make blocking criteria explicit**.
 
 ## Run locally
-
-### 1. Clone
 
 ```bash
 git clone https://github.com/h00w/production-ai-automation.git
 cd production-ai-automation
-```
-
-### 2. Create a virtual environment
-
-Windows PowerShell:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-macOS / Linux:
-
-```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-python -m pip install --upgrade pip
+python -m venv .venv
 python -m pip install -r requirements.txt
-```
-
-### 4. Validate the implementation
-
-```bash
 python -m pytest -q
-```
-
-### 5. Run the application
-
-```bash
 python -m streamlit run app.py
 ```
 
-Then open `http://localhost:8501`.
+## Business outcome discipline
 
-## Design principle
+The repository separates engineering proof from business claims. Production deployments should measure metrics such as automation rate, handling time, safe escalation rate, false-automation rate, tool failure rate, cost per completed workflow, and audit completeness.
 
-> **AI may propose. Software validates. Policy authorizes. Tools execute within boundaries. Verification decides whether the workflow is complete.**
+Demonstration values are not presented as customer ROI. See [`docs/business_outcome.md`](docs/business_outcome.md).
 
-That principle is the core of this project: production AI automation should be useful enough to remove repetitive work, but controlled enough that consequential actions remain inspectable, recoverable, and auditable.
+## Scaling path
 
-## Proof of work
+The deterministic adapters are intentionally replaceable. The same boundaries can be connected to model providers, CRM/support systems, payment APIs, workflow engines, databases, and observability platforms without changing the central governance model.
 
-This repository demonstrates the complete engineering lifecycle:
+## Proof chain
 
-**Design → Implement → Test → Deploy → Document → Measure**
+**Architecture → Typed Contracts → Controlled Tools → Verification → Human Approval → Tests → CI → Live Demo**
 
-- **Live application:** https://pro-ai-automation.streamlit.app/
-- **Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Evaluation flow:** [Evaluation Flow](#evaluation-flow)
-- **Business outcomes:** [docs/business_outcome.md](docs/business_outcome.md)
-- **Tests:** [tests/](tests/)
-- **Technical article:** [Beyond the AI Demo: Engineering Automation That Survives Production](article/production_ai_automation_article.md)
-- **CI:** [GitHub Actions](https://github.com/h00w/production-ai-automation/actions/workflows/ci.yml)
+- Live application: https://pro-ai-automation.streamlit.app/
+- Architecture: [`docs/architecture.md`](docs/architecture.md)
+- Business outcomes: [`docs/business_outcome.md`](docs/business_outcome.md)
+- Tests: [`tests/`](tests/)
+- Technical article: [`article/production_ai_automation_article.md`](article/production_ai_automation_article.md)
 
 ## Author
 
 **Hendarmawan, PhD Eng.**  
-AI Automation · Production AI · LLM Evaluation · Agentic Systems · Secure AI Infrastructure
+Production AI · AI Automation · Agentic Systems · AI Evaluation · Secure AI Infrastructure
 
-[LinkedIn](https://www.linkedin.com/in/hender/) · [GitHub](https://github.com/h00w) · [LIFE-AI](https://www.life-ai.se/) · [Live Demo](https://pro-ai-automation.streamlit.app/)
-
----
-
-<p align="center">
-  <strong>Production AI should not stop at a successful model response.</strong><br>
-  It should remain testable, observable, controlled, and recoverable after deployment.
-</p>
+[Website](https://hendarmawan.se) · [LinkedIn](https://www.linkedin.com/in/hender/) · [GitHub](https://github.com/h00w)
