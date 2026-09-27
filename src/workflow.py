@@ -127,6 +127,21 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
             )
 
         # Refund workflow
+        if req.amount_usd is None:
+            trace.append("missing_refund_amount")
+            return WorkflowResult(
+                request_id=req.request_id,
+                intent=cls.intent,
+                status="needs_more_information",
+                automated=False,
+                requires_human_approval=False,
+                proposed_action="Request the refund amount before preparing a proposal.",
+                final_message="Please provide the refund amount so the request can be reviewed.",
+                tool_result=tool_result,
+                checks=checks + ["refund_amount_missing"],
+                trace=trace,
+            )
+
         if order["days_since_purchase"] > 30:
             trace.append("refund_policy_block")
             return WorkflowResult(
