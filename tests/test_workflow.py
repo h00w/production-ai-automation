@@ -42,6 +42,16 @@ def test_missing_order_id_requests_more_information():
     assert result.automated is False
 
 
+def test_refund_without_amount_never_creates_proposal():
+    req = RequestInput(request_id="t-missing-amount", text="Refund my order", order_id="ORD-1000")
+    result = run_workflow(req)
+    assert result.status == "needs_more_information"
+    assert result.automated is False
+    assert result.tool_result is not None
+    assert result.tool_result.tool == "lookup_order"
+    assert "refund_amount_missing" in result.checks
+
+
 def test_ambiguous_request_routes_safely():
     req = RequestInput(
         request_id="t4",
