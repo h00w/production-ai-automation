@@ -1,5 +1,7 @@
 from src.revops_models import LeadInput, LeadQualification, LeadTemperature, AutomationDecision
 from src.revops_policy import decide_lead_action
+from pydantic import ValidationError
+import pytest
 
 
 def lead(consent=True):
@@ -69,3 +71,9 @@ def test_low_score_nurtures():
     result = decide_lead_action(lead(), qual(score=45, confidence=0.91))
     assert result.decision == AutomationDecision.NURTURE
     assert result.can_contact is True
+
+
+@pytest.mark.parametrize("invalid", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_confidence_cannot_authorize_contact(invalid):
+    with pytest.raises(ValidationError):
+        qual(confidence=invalid)
