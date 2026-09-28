@@ -1,0 +1,97 @@
+{
+  "name": "Production Lead Intake - Safe Starter",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "production-lead-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook - Lead Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-600, 0],
+      "webhookId": "production-lead-intake"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $json.body ?? $json;\nconst required = ['name','email','company'];\nconst missing = required.filter(k => !b[k] || String(b[k]).trim() === '');\nconst email = String(b.email ?? '').trim().toLowerCase();\nconst validEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\nreturn [{json:{lead_id:String(b.lead_id ?? `lead_${Date.now()}`),name:String(b.name ?? '').trim(),email,company:String(b.company ?? '').trim(),role:b.role ?? null,phone:b.phone ?? null,message:String(b.message ?? '').slice(0,4000),source:String(b.source ?? 'webhook'),consent_to_contact:Boolean(b.consent_to_contact),validation:{valid:missing.length===0 && validEmail,missing,valid_email:validEmail}}}];"
+      },
+      "id": "2",
+      "name": "Normalize + Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-360, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "valid-condition",
+              "leftValue": "={{ $json.validation.valid }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "true", "singleValue": true}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3",
+      "name": "Valid Input?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-120, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst lead = $json;\nconst idempotencyKey = crypto.createHash('sha256').update(`${lead.email}|${lead.company}|${lead.source}`).digest('hex');\nreturn [{json:{event_id:`evt_${crypto.randomUUID()}`,event_type:'lead.created',schema_version:'1.0',workflow_version:'1.0.0',correlation_id:`corr_${crypto.randomUUID()}`,idempotency_key:idempotencyKey,occurred_at:new Date().toISOString(),payload:lead,metadata:{orchestrator:'n8n',safe_starter:true}}}];"
+      },
+      "id": "4",
+      "name": "Build Event Envelope",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [140, -80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { accepted: true, event_id: $json.event_id, correlation_id: $json.correlation_id, idempotency_key: $json.idempotency_key, next_state: 'qualification_pending' } }}",
+        "options": {"responseCode": 202}
+      },
+      "id": "5",
+      "name": "Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [400, -80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { accepted: false, error: 'invalid_input', validation: $json.validation } }}",
+        "options": {"responseCode": 400}
+      },
+      "id": "6",
+      "name": "Reject Invalid Input",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [140, 120]
+    }
+  ],
+  "connections": {
+    "Webhook - Lead Intake": {"main": [[{"node": "Normalize + Validate", "type": "main", "index": 0}]]},
+    "Normalize + Validate": {"main": [[{"node": "Valid Input?", "type": "main", "index": 0}]]},
+    "Valid Input?": {"main": [[{"node": "Build Event Envelope", "type": "main", "index": 0}], [{"node": "Reject Invalid Input", "type": "main", "index": 0}]]},
+    "Build Event Envelope": {"main": [[{"node": "Accepted", "type": "main", "index": 0}]]}
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "meta": {"templateCredsSetupCompleted": true},
+  "tags": []
+}
