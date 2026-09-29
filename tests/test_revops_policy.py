@@ -67,6 +67,15 @@ def test_missing_contact_consent_blocks_outreach():
     assert result.can_contact is False
 
 
+def test_empty_evidence_blocks_automated_contact():
+    for evidence in ([], ["  "]):
+        qualification = qual()
+        qualification.evidence = evidence
+        result = decide_lead_action(lead(), qualification)
+        assert result.decision == AutomationDecision.HUMAN_REVIEW
+        assert result.can_contact is False
+
+
 def test_low_score_nurtures():
     result = decide_lead_action(lead(), qual(score=45, confidence=0.91))
     assert result.decision == AutomationDecision.NURTURE
