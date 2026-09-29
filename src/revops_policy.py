@@ -36,6 +36,15 @@ def decide_lead_action(lead: LeadInput, qualification: LeadQualification) -> Pol
             policy_version=POLICY_VERSION,
         )
 
+    if not any(item.strip() for item in qualification.evidence):
+        return PolicyDecision(
+            decision=AutomationDecision.HUMAN_REVIEW,
+            reason="Qualification lacks supporting evidence for automated action.",
+            requires_human_approval=True,
+            can_contact=False,
+            policy_version=POLICY_VERSION,
+        )
+
     if qualification.confidence < 0.70:
         return PolicyDecision(
             decision=AutomationDecision.RESEARCH_MORE,
