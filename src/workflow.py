@@ -110,6 +110,21 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
                 trace=trace,
             )
 
+        if order.get("order_id") != order_id:
+            trace.append("order_identity_mismatch")
+            return WorkflowResult(
+                request_id=req.request_id,
+                intent=cls.intent,
+                status="needs_human_review",
+                automated=False,
+                requires_human_approval=True,
+                proposed_action="Investigate mismatched order lookup evidence.",
+                final_message="The order lookup needs human review before any action.",
+                tool_result=tool_result,
+                checks=checks + ["order_identity_mismatch"],
+                trace=trace,
+            )
+
         checks.append("order_exists")
 
         if cls.intent == Intent.ORDER_STATUS:

@@ -1,5 +1,6 @@
 from src.models import RequestInput
 from src.workflow import run_workflow
+from src.adapters import MockBusinessTools
 from pydantic import ValidationError
 import pytest
 
@@ -42,6 +43,21 @@ def test_missing_order_id_requests_more_information():
     result = run_workflow(req)
     assert result.status == "needs_more_information"
     assert result.automated is False
+
+
+def test_mismatched_order_lookup_requires_review_before_refund():
+    class WrongOrderTools(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return {"found": True, "order_id": "ORD-DIFFERENT", "status": "delivered", "days_since_purchase": 1}
+
+        def propose_refund(self, order_id, amount_usd):
+            raise AssertionError("mismatched order must never reach refund proposal")
+
+    req = RequestInput(request_id="mismatch", text="Refund my order", order_id="ORD-1000", amount_usd=10)
+    result = run_workflow(req, tools=WrongOrderTools())
+    assert result.status == "needs_human_review"
+    assert result.requires_human_approval
+    assert "order_identity_mismatch" in result.checks
 
 
 def test_refund_without_amount_never_creates_proposal():
