@@ -1,5 +1,7 @@
 from src.models import RequestInput
 from src.workflow import run_workflow
+from pydantic import ValidationError
+import pytest
 
 
 def test_sales_lead_is_automated():
@@ -50,6 +52,19 @@ def test_refund_without_amount_never_creates_proposal():
     assert result.tool_result is not None
     assert result.tool_result.tool == "lookup_order"
     assert "refund_amount_missing" in result.checks
+
+
+def test_zero_refund_never_creates_proposal():
+    req = RequestInput(request_id="t-zero", text="Refund my order", order_id="ORD-1000", amount_usd=0)
+    result = run_workflow(req)
+    assert result.status == "needs_more_information"
+    assert result.tool_result.tool == "lookup_order"
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_refund_amount_is_rejected(value):
+    with pytest.raises(ValidationError):
+        RequestInput(request_id="t-invalid", text="Refund my order", amount_usd=value)
 
 
 def test_ambiguous_request_routes_safely():
