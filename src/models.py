@@ -23,7 +23,7 @@ class RequestInput(BaseModel):
     text: str = Field(min_length=3, max_length=4000)
     customer_id: Optional[str] = None
     order_id: Optional[str] = None
-    amount_usd: Optional[float] = Field(default=None, ge=0)
+    amount_usd: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
 
 
 class Classification(BaseModel):
