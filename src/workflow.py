@@ -1,5 +1,6 @@
 from __future__ import annotations
 import re
+from math import isfinite
 from typing import Tuple
 
 from .models import (
@@ -157,7 +158,24 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
                 trace=trace,
             )
 
-        if order["days_since_purchase"] > 30:
+        purchase_age = order.get("days_since_purchase")
+        if (isinstance(purchase_age, bool) or not isinstance(purchase_age, (int, float))
+                or not isfinite(purchase_age) or purchase_age < 0):
+            trace.append("refund_age_invalid")
+            return WorkflowResult(
+                request_id=req.request_id,
+                intent=cls.intent,
+                status="needs_human_review",
+                automated=False,
+                requires_human_approval=True,
+                proposed_action="Verify purchase age before preparing a refund proposal.",
+                final_message="The purchase date needs human review before a refund can be prepared.",
+                tool_result=tool_result,
+                checks=checks + ["refund_age_invalid"],
+                trace=trace,
+            )
+
+        if purchase_age > 30:
             trace.append("refund_policy_block")
             return WorkflowResult(
                 request_id=req.request_id,
