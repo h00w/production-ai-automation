@@ -5,6 +5,22 @@ from pydantic import ValidationError
 import pytest
 
 
+@pytest.mark.parametrize("age", [float("nan"), float("inf"), -1, True, "2", None])
+def test_invalid_purchase_age_never_creates_refund(age):
+    class InvalidAgeTools(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return {"found": True, "order_id": order_id, "days_since_purchase": age}
+
+        def propose_refund(self, order_id, amount_usd):
+            raise AssertionError("invalid purchase age must never reach refund proposal")
+
+    req = RequestInput(request_id="invalid-age", text="Refund my order", order_id="ORD-1000", amount_usd=10)
+    result = run_workflow(req, tools=InvalidAgeTools())
+    assert result.status == "needs_human_review"
+    assert result.requires_human_approval
+    assert "refund_age_invalid" in result.checks
+
+
 def test_sales_lead_is_automated():
     req = RequestInput(
         request_id="t1",
