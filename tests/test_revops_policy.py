@@ -86,3 +86,18 @@ def test_low_score_nurtures():
 def test_nonfinite_confidence_cannot_authorize_contact(invalid):
     with pytest.raises(ValidationError):
         qual(confidence=invalid)
+
+
+@pytest.mark.parametrize("invalid", [True, False, "0.92"])
+def test_coerced_confidence_cannot_authorize_contact(invalid):
+    with pytest.raises(ValidationError):
+        qual(confidence=invalid)
+
+
+@pytest.mark.parametrize("field", ["icp_fit", "intent", "urgency", "technical_fit", "commercial_fit", "score"])
+@pytest.mark.parametrize("invalid", [True, "90", 90.0])
+def test_qualification_scores_require_integer_evidence(field, invalid):
+    payload = qual().model_dump()
+    payload[field] = invalid
+    with pytest.raises(ValidationError):
+        LeadQualification.model_validate(payload)
