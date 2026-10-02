@@ -35,13 +35,13 @@ class LeadInput(BaseModel):
 
 
 class LeadQualification(BaseModel):
-    icp_fit: int = Field(ge=0, le=100)
-    intent: int = Field(ge=0, le=100)
-    urgency: int = Field(ge=0, le=100)
-    technical_fit: int = Field(ge=0, le=100)
-    commercial_fit: int = Field(ge=0, le=100)
-    score: int = Field(ge=0, le=100)
-    confidence: float = Field(ge=0.0, le=1.0, allow_inf_nan=False)
+    icp_fit: int = Field(ge=0, le=100, strict=True)
+    intent: int = Field(ge=0, le=100, strict=True)
+    urgency: int = Field(ge=0, le=100, strict=True)
+    technical_fit: int = Field(ge=0, le=100, strict=True)
+    commercial_fit: int = Field(ge=0, le=100, strict=True)
+    score: int = Field(ge=0, le=100, strict=True)
+    confidence: float = Field(ge=0.0, le=1.0, allow_inf_nan=False, strict=True)
     temperature: LeadTemperature
     evidence: List[str] = Field(default_factory=list, max_length=20)
     risk_flags: List[str] = Field(default_factory=list, max_length=20)
