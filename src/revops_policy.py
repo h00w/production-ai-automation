@@ -18,7 +18,7 @@ def decide_lead_action(lead: LeadInput, qualification: LeadQualification) -> Pol
     model response alone.
     """
 
-    if not lead.consent_to_contact:
+    if lead.consent_to_contact is not True:
         return PolicyDecision(
             decision=AutomationDecision.HUMAN_REVIEW,
             reason="Lead has not provided consent for automated outreach.",
