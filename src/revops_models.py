@@ -31,7 +31,7 @@ class LeadInput(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=50)
     message: str = Field(default="", max_length=4000)
     source: str = Field(default="unknown", max_length=100)
-    consent_to_contact: bool = False
+    consent_to_contact: bool = Field(default=False, strict=True)
 
 
 class LeadQualification(BaseModel):

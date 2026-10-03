@@ -67,6 +67,25 @@ def test_missing_contact_consent_blocks_outreach():
     assert result.can_contact is False
 
 
+@pytest.mark.parametrize("consent", ["true", "false", "yes", "on", 1, 0, None])
+def test_contact_consent_requires_an_explicit_boolean(consent):
+    with pytest.raises(ValidationError):
+        lead(consent=consent)
+
+
+def test_missing_contact_consent_defaults_to_refusal():
+    payload = lead().model_dump()
+    del payload["consent_to_contact"]
+    result = decide_lead_action(LeadInput.model_validate(payload), qual())
+    assert result.can_contact is False
+
+
+@pytest.mark.parametrize("consent", ["true", "yes", 1])
+def test_policy_refuses_mutated_consent_without_boolean_approval(consent):
+    modified = lead().model_copy(update={"consent_to_contact": consent})
+    assert decide_lead_action(modified, qual()).can_contact is False
+
+
 def test_empty_evidence_blocks_automated_contact():
     for evidence in ([], ["  "]):
         qualification = qual()
