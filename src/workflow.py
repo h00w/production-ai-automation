@@ -192,6 +192,27 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
 
         proposal = tools.propose_refund(order_id, req.amount_usd)
         trace.append("tool:propose_refund")
+        proposed_amount = proposal.get("amount_usd")
+        if (
+            proposal.get("order_id") != order_id
+            or proposal.get("state") != "proposed_not_committed"
+            or isinstance(proposed_amount, bool)
+            or not isinstance(proposed_amount, (int, float))
+            or not isfinite(proposed_amount)
+            or proposed_amount != req.amount_usd
+        ):
+            return WorkflowResult(
+                request_id=req.request_id,
+                intent=cls.intent,
+                status="needs_human_review",
+                automated=False,
+                requires_human_approval=True,
+                proposed_action="Investigate refund proposal evidence before accepting it.",
+                final_message="The refund proposal needs human review before any action.",
+                tool_result=ToolResult(tool="propose_refund", success=False, data=proposal),
+                checks=checks + ["refund_proposal_mismatch"],
+                trace=trace + ["refund_proposal_mismatch"],
+            )
         tool_result = ToolResult(tool="propose_refund", success=True, data=proposal)
 
         requires_approval = cls.risk == RiskLevel.HIGH

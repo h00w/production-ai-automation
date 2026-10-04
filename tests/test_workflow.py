@@ -32,6 +32,29 @@ def test_sales_lead_is_automated():
     assert result.requires_human_approval is False
 
 
+@pytest.mark.parametrize("overrides", [
+    {"order_id": "OTHER"}, {"amount_usd": 11}, {"amount_usd": True},
+    {"amount_usd": "10"}, {"amount_usd": None}, {"amount_usd": float("nan")},
+    {"state": "committed"}, {"state": None},
+])
+@pytest.mark.parametrize("amount", [10, 500])
+def test_mismatched_refund_proposal_requires_review(overrides, amount):
+    class InvalidProposalTools(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return {"found": True, "order_id": order_id, "days_since_purchase": 1}
+
+        def propose_refund(self, order_id, amount_usd):
+            return {**super().propose_refund(order_id, amount_usd), **overrides}
+
+    req = RequestInput(request_id="proposal", text="Refund my order", order_id="ORD-1000", amount_usd=amount)
+    result = run_workflow(req, InvalidProposalTools())
+    assert result.status == "needs_human_review"
+    assert result.automated is False
+    assert result.requires_human_approval is True
+    assert result.tool_result.success is False
+    assert "refund_proposal_mismatch" in result.checks
+
+
 def test_high_value_refund_requires_approval_when_policy_allows():
     # We search a small set of deterministic IDs until one is within the demo window.
     candidate = None
