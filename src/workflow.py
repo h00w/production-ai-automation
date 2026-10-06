@@ -94,7 +94,21 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
         order_id = _resolve_order_id(req, cls)
         order = tools.lookup_order(order_id)
         trace.append("tool:lookup_order")
-        tool_result = ToolResult(tool="lookup_order", success=order.get("found", False), data=order)
+        tool_result = ToolResult(tool="lookup_order", success=order.get("found") is True, data=order)
+
+        if not isinstance(order.get("found"), bool):
+            return WorkflowResult(
+                request_id=req.request_id,
+                intent=cls.intent,
+                status="needs_human_review",
+                automated=False,
+                requires_human_approval=True,
+                proposed_action="Investigate malformed order lookup evidence.",
+                final_message="The order lookup needs human review before any action.",
+                tool_result=tool_result,
+                checks=checks + ["order_lookup_invalid"],
+                trace=trace + ["order_lookup_invalid"],
+            )
 
         if not order.get("found"):
             trace.append("missing_order_escalation")
