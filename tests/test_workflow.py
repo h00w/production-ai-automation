@@ -5,6 +5,23 @@ from pydantic import ValidationError
 import pytest
 
 
+@pytest.mark.parametrize("found", ["true", "false", 1, [], {}])
+def test_malformed_order_found_flag_never_creates_refund(found):
+    class InvalidLookupTools(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return {"found": found, "order_id": order_id, "days_since_purchase": 1}
+
+        def propose_refund(self, order_id, amount_usd):
+            raise AssertionError("malformed lookup must not create a refund")
+
+    req = RequestInput(request_id="lookup", text="Refund my order", order_id="ORD-1000", amount_usd=10)
+    result = run_workflow(req, InvalidLookupTools())
+    assert result.status == "needs_human_review"
+    assert result.requires_human_approval is True
+    assert result.tool_result.success is False
+    assert "order_lookup_invalid" in result.checks
+
+
 @pytest.mark.parametrize("age", [float("nan"), float("inf"), -1, True, "2", None])
 def test_invalid_purchase_age_never_creates_refund(age):
     class InvalidAgeTools(MockBusinessTools):
