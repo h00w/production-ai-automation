@@ -22,6 +22,20 @@ def test_malformed_order_found_flag_never_creates_refund(found):
     assert "order_lookup_invalid" in result.checks
 
 
+@pytest.mark.parametrize("status", [None, "", "  ", True, 1, [], {}])
+def test_malformed_order_status_requires_review(status):
+    class InvalidStatusTools(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return {"found": True, "order_id": order_id, "status": status}
+
+    req = RequestInput(request_id="status", text="Where is my order?", order_id="ORD-1000")
+    result = run_workflow(req, InvalidStatusTools())
+    assert result.status == "needs_human_review"
+    assert result.automated is False
+    assert result.requires_human_approval is True
+    assert "order_status_invalid" in result.checks
+
+
 @pytest.mark.parametrize("age", [float("nan"), float("inf"), -1, True, "2", None])
 def test_invalid_purchase_age_never_creates_refund(age):
     class InvalidAgeTools(MockBusinessTools):
