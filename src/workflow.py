@@ -143,6 +143,20 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
         checks.append("order_exists")
 
         if cls.intent == Intent.ORDER_STATUS:
+            status = order.get("status")
+            if not isinstance(status, str) or not status.strip():
+                return WorkflowResult(
+                    request_id=req.request_id,
+                    intent=cls.intent,
+                    status="needs_human_review",
+                    automated=False,
+                    requires_human_approval=True,
+                    proposed_action="Verify malformed order status evidence.",
+                    final_message="The order status needs human review before it can be returned.",
+                    tool_result=tool_result,
+                    checks=checks + ["order_status_invalid"],
+                    trace=trace + ["order_status_invalid"],
+                )
             return WorkflowResult(
                 request_id=req.request_id,
                 intent=cls.intent,
@@ -150,7 +164,7 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
                 automated=True,
                 requires_human_approval=False,
                 proposed_action="Return current order status.",
-                final_message=f"Order {order_id} is currently {order['status']}.",
+                final_message=f"Order {order_id} is currently {status.strip()}.",
                 tool_result=tool_result,
                 checks=checks + ["read_only_action"],
                 trace=trace + ["completed"],
