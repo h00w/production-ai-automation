@@ -161,3 +161,19 @@ def test_ambiguous_request_routes_safely():
     result = run_workflow(req)
     assert result.requires_human_approval is True
     assert result.automated is False
+
+
+@pytest.mark.parametrize("payload", [None, [], "unavailable"])
+def test_invalid_order_response_routes_to_review(payload):
+    class BrokenLookup(MockBusinessTools):
+        def lookup_order(self, order_id):
+            return payload
+
+        def propose_refund(self, order_id, amount_usd):
+            pytest.fail("No refund proposal may follow an invalid lookup")
+
+    req = RequestInput(request_id="shape", text="Refund my order", order_id="ORD-1000", amount_usd=10)
+    result = run_workflow(req, BrokenLookup())
+    assert result.status == "needs_human_review"
+    assert result.tool_result.success is False
+    assert "order_lookup_invalid" in result.checks
