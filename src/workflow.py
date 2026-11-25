@@ -94,6 +94,8 @@ def run_workflow(req: RequestInput, tools: MockBusinessTools | None = None) -> W
         order_id = _resolve_order_id(req, cls)
         order = tools.lookup_order(order_id)
         trace.append("tool:lookup_order")
+        if not isinstance(order, dict):
+            order = {}
         tool_result = ToolResult(tool="lookup_order", success=order.get("found") is True, data=order)
 
         if not isinstance(order.get("found"), bool):
